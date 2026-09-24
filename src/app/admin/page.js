@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useAdminAuth } from "@/lib/use-admin-auth";
 
@@ -9,10 +9,13 @@ export default function AdminDashboardPage() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Guard: ensure we fetch exactly once per mount, regardless of any
+  // dependency identity changes that might occur during hydration.
+  const fetchedRef = useRef(false);
 
   const loadEvents = useCallback(async () => {
     if (!token) {
-      setLoading(false); // ← was missing: token null → loading stuck forever
+      setLoading(false);
       return;
     }
     setLoading(true);
@@ -38,11 +41,18 @@ export default function AdminDashboardPage() {
     } finally {
       setLoading(false);
     }
+  // logout is stable (memoized in useAdminAuth). It's included here for
+  // correctness but will NOT change after mount, so it won't cause re-fires.
   }, [token, logout]);
 
   useEffect(() => {
-    if (ready && token) loadEvents();
-  }, [ready, token, loadEvents]);
+    if (!ready) return;
+    // Fire exactly once per mount.
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+    loadEvents();
+  }, [ready, loadEvents]);
+
 
   if (!ready) return null;
 
