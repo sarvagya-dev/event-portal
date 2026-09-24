@@ -1,73 +1,68 @@
-import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import EventsClient from "@/components/EventsClient";
 
 export const dynamic = "force-dynamic";
 
-export default async function EventsPage() {
+export const metadata = {
+  title: "Events — BasicUnstop",
+  description:
+    "Browse upcoming hackathons, workshops, coding competitions, and seminars. Register now.",
+};
+
+// ── Loading skeleton (used by Suspense boundary if needed) ────────────
+function ErrorState() {
+  return (
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 py-24 flex flex-col items-center gap-5 text-center">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-2xl">⚠️</div>
+      <div>
+        <p className="font-semibold text-foreground">Unable to load events</p>
+        <p className="mt-1 text-sm text-muted">There was a problem connecting to the database. Please try again later.</p>
+      </div>
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 py-24 flex flex-col items-center gap-4 text-center">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-surface-2 text-3xl">📅</div>
+      <div>
+        <p className="font-semibold text-foreground">No upcoming events</p>
+        <p className="mt-1 text-sm text-muted">Check back soon — new events are added regularly.</p>
+      </div>
+    </div>
+  );
+}
+
+export default async function EventsPage({ searchParams }) {
   const today = new Date().toISOString().split("T")[0];
 
   const { data: events, error } = await supabase
     .from("events")
-    .select("id, slug, title, description, category, date, time, mode, venue, organizer, capacity")
+    .select(
+      "id, slug, title, description, category, date, time, mode, venue, organizer, capacity"
+    )
     .gte("date", today)
     .order("date", { ascending: true });
 
   if (error) {
     console.error("Failed to load events:", error);
-    return (
-      <main className="flex flex-1 items-center justify-center px-6 py-24">
-        <p className="text-lg text-red-500">
-          Unable to load events. Please try again later.
-        </p>
-      </main>
-    );
+    return <ErrorState />;
   }
 
   if (!events || events.length === 0) {
-    return (
-      <main className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-24 text-center">
-        <h1 className="text-3xl font-bold">Upcoming Events</h1>
-        <p className="text-foreground/60">No upcoming events at the moment. Check back soon!</p>
-        <Link href="/" className="text-sm underline underline-offset-4 hover:opacity-80">
-          ← Back home
-        </Link>
-      </main>
-    );
+    return <EmptyState />;
   }
 
-  return (
-    <main className="mx-auto w-full max-w-5xl px-6 py-16">
-      <div className="mb-10 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Upcoming Events</h1>
-        <Link href="/" className="text-sm underline underline-offset-4 hover:opacity-80">
-          ← Home
-        </Link>
-      </div>
+  // Pass the initial category from the URL query so navbar quick-links
+  // pre-filter the category chips on the client.
+  const params = await searchParams;
+  const initialCategory = params?.category || "All";
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {events.map((event) => (
-          <Link
-            key={event.id}
-            href={`/events/${event.slug}`}
-            className="group flex flex-col rounded-xl border border-foreground/10 p-5 transition hover:border-foreground/25 hover:shadow-md"
-          >
-            <span className="mb-2 inline-block w-fit rounded-full bg-foreground/5 px-3 py-0.5 text-xs font-medium">
-              {event.category}
-            </span>
-            <h2 className="mb-1 text-lg font-semibold group-hover:underline">
-              {event.title}
-            </h2>
-            <p className="mb-4 line-clamp-2 text-sm text-foreground/60">
-              {event.description}
-            </p>
-            <div className="mt-auto space-y-1 text-xs text-foreground/50">
-              <p>📅 {new Date(event.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
-              <p>📍 {event.mode === "online" ? "Online" : event.venue || "TBA"}</p>
-              <p>👤 {event.organizer}</p>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </main>
+  return (
+    <EventsClient
+      events={events}
+      initialCategory={initialCategory}
+    />
   );
 }

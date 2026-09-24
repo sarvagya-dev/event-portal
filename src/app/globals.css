@@ -1,26 +1,79 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..800;1,14..32,300..800&display=swap");
 @import "tailwindcss";
 
+
+/* ─── Design tokens ─────────────────────────────────────────────────── */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --surface:    #f8f8f8;
+  --surface-2:  #f1f1f1;
+  --border:     #e5e5e5;
+  --foreground: #111111;
+  --muted:      #6b7280;
+  --accent:     #4f46e5;        /* indigo-600 */
+  --accent-light: #eef2ff;      /* indigo-50  */
+  --accent-fg:  #ffffff;
+  --radius:     12px;
+  --radius-sm:  8px;
+  --radius-lg:  16px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background:    var(--background);
+  --color-foreground:    var(--foreground);
+  --color-surface:       var(--surface);
+  --color-surface-2:     var(--surface-2);
+  --color-border:        var(--border);
+  --color-muted:         var(--muted);
+  --color-accent:        var(--accent);
+  --color-accent-light:  var(--accent-light);
+  --color-accent-fg:     var(--accent-fg);
+  --font-sans:   "Inter", var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono:   var(--font-geist-mono), monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --surface:    #141414;
+    --surface-2:  #1e1e1e;
+    --border:     #2a2a2a;
+    --foreground: #f0f0f0;
+    --muted:      #9ca3af;
+    --accent:     #6366f1;       /* slightly lighter indigo for dark */
+    --accent-light: #1e1b4b;
+    --accent-fg:  #ffffff;
   }
+}
+
+/* ─── Base ──────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
 }
+
+/* ─── Category gradient palettes ────────────────────────────────────── */
+/* Used by the frontend fallback thumbnail system.                       */
+/* Classes: .cat-gradient-{n}  where n = 0-8                            */
+.cat-gradient-0 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.cat-gradient-1 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.cat-gradient-2 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.cat-gradient-3 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+.cat-gradient-4 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+.cat-gradient-5 { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
+.cat-gradient-6 { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+.cat-gradient-7 { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
+.cat-gradient-8 { background: linear-gradient(135deg, #fd7043 0%, #ff8a65 100%); }
+
+/* ─── Scrollbar ─────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }

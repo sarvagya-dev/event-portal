@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Event Portal",
-  description: "Discover, register, and manage events",
+  title: "BasicUnstop — Discover & Join Events",
+  description:
+    "Find hackathons, workshops, competitions, and seminars. Register instantly. Build your profile.",
 };
 
 export default function RootLayout({ children }) {
@@ -22,7 +24,16 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-background text-foreground">
+        <Navbar />
+        <div className="flex-1">{children}</div>
+        <footer className="border-t border-border mt-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted">
+            <span className="font-semibold text-foreground/60">BasicUnstop</span>
+            <span>© {new Date().getFullYear()} BasicUnstop. Empowering student communities.</span>
+          </div>
+        </footer>
+      </body>
     </html>
   );
 }
