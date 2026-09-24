@@ -11,7 +11,10 @@ export default function AdminDashboardPage() {
   const [error, setError] = useState(null);
 
   const loadEvents = useCallback(async () => {
-    if (!token) return;
+    if (!token) {
+      setLoading(false); // ← was missing: token null → loading stuck forever
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -22,8 +25,13 @@ export default function AdminDashboardPage() {
         logout();
         return;
       }
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to load events.");
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error(`Server error (HTTP ${res.status}) — check Vercel logs.`);
+      }
+      if (!res.ok) throw new Error(data.error || `Server error (HTTP ${res.status}).`);
       setEvents(data.events || []);
     } catch (err) {
       setError(err.message);

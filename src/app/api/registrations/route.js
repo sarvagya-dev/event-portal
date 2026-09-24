@@ -192,7 +192,7 @@ export async function POST(request) {
           organizer: event.organizer,
         });
 
-        const { error: emailError } = await resend.emails.send({
+        const { data: emailData, error: emailError } = await resend.emails.send({
           from: fromEmail,
           to: trimmedEmail,
           subject: `Registration Confirmed — ${event.title}`,
@@ -200,12 +200,21 @@ export async function POST(request) {
         });
 
         if (emailError) {
-          console.error("Resend email error:", emailError);
+          // Log the full Resend error so it appears in Vercel function logs.
+          // Common causes: sender domain not verified, recipient rejected by test-mode sender.
+          console.error("[Resend] Email send failed:", JSON.stringify({
+            status: emailError.statusCode,
+            name: emailError.name,
+            message: emailError.message,
+            from: fromEmail,
+            to: trimmedEmail,
+          }));
         } else {
           emailSent = true;
+          console.log("[Resend] Email sent:", emailData?.id);
         }
       } catch (emailErr) {
-        console.error("Failed to send confirmation email:", emailErr);
+        console.error("[Resend] Unexpected error:", emailErr?.message || emailErr);
       }
     }
 

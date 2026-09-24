@@ -201,7 +201,8 @@ export default function RegistrationForm({ event }) {
               required
               value={form.year}
               onChange={handleChange}
-              className={`${inputClass} ${!form.year ? "text-foreground/35" : ""}`}
+              className={`w-full rounded-lg border border-foreground/15 px-3.5 py-2.5 text-sm outline-none transition focus:border-foreground/40 focus:ring-2 focus:ring-foreground/10 ${!form.year ? "text-foreground/35" : "text-foreground"}`}
+              style={{ backgroundColor: "var(--background)", color: form.year ? "var(--foreground)" : undefined }}
             >
               <option value="" disabled>
                 Select year
