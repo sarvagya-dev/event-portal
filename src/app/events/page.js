@@ -34,7 +34,7 @@ function EmptyState() {
   );
 }
 
-export default async function EventsPage({ searchParams }) {
+export default async function EventsPage() {
   const today = new Date().toISOString().split("T")[0];
 
   const { data: events, error } = await supabase
@@ -54,15 +54,7 @@ export default async function EventsPage({ searchParams }) {
     return <EmptyState />;
   }
 
-  // Pass the initial category from the URL query so navbar quick-links
-  // pre-filter the category chips on the client.
-  const params = await searchParams;
-  const initialCategory = params?.category || "All";
-
   return (
-    <EventsClient
-      events={events}
-      initialCategory={initialCategory}
-    />
+    <EventsClient events={events} />
   );
 }

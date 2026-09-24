@@ -1,7 +1,16 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+
+// Maps navbar keyword → substring match against event.category (case-insensitive).
+// Allows "Hackathon" to match "HackSprint Winter 2026" category, etc.
+const NAV_CATEGORY_MAP = {
+  Hackathon:   "hackathon",
+  Workshop:    "workshop",
+  Competition: "competition",
+};
 
 // ── Deterministic gradient thumbnail (no image field in schema) ─────────
 // Hashes the category string into one of 9 palettes so the same category
@@ -159,10 +168,24 @@ function EventCard({ event, featured = false }) {
 const MODE_FILTERS = ["All", "Online", "Offline", "Hybrid"];
 
 // ── Main client component ─────────────────────────────────────────────
-export default function EventsClient({ events, initialCategory }) {
+export default function EventsClient({ events }) {
+  // Read the ?category= query param reactively so navbar links work on
+  // client-side navigation (useState initial value only fires on mount).
+  const searchParams = useSearchParams();
+  const navCategory = searchParams.get("category") || "All";
+
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState(initialCategory || "All");
+  // category chip state tracks the FULL category string ("All" or exact DB value)
+  // but is initialised/synced from the URL nav keyword via useEffect.
+  const [category, setCategory] = useState("All");
   const [mode, setMode] = useState("All");
+
+  // Sync chip state whenever the URL ?category changes (client-side navigation).
+  useEffect(() => {
+    setCategory(navCategory);
+    setSearch("");  // clear search so the filter result is clean
+    setMode("All");
+  }, [navCategory]);
 
   // Derive all unique categories from data
   const categories = useMemo(() => {
@@ -180,7 +203,15 @@ export default function EventsClient({ events, initialCategory }) {
         e.description?.toLowerCase().includes(q) ||
         e.organizer?.toLowerCase().includes(q) ||
         e.category?.toLowerCase().includes(q);
-      const matchesCategory = category === "All" || e.category === category;
+      // Category matching: if the chip value exactly equals a DB category, use
+      // exact match. If it's a navbar keyword (e.g. "Hackathon"), use substring
+      // containment so "Coding Competition" matches "Competition" etc.
+      const navKeyword = NAV_CATEGORY_MAP[category];
+      const matchesCategory =
+        category === "All" ||
+        (navKeyword
+          ? e.category?.toLowerCase().includes(navKeyword)
+          : e.category === category);
       const matchesMode =
         mode === "All" ||
         e.mode?.toLowerCase() === mode.toLowerCase();

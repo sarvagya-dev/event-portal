@@ -144,7 +144,7 @@ export default function AdminDashboardPage() {
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/admin/events/${event.slug}/candidates`}
-                      className="rounded-lg border border-foreground/15 px-3 py-1.5 text-xs font-medium transition hover:bg-foreground/5"
+                      className="inline-flex items-center whitespace-nowrap rounded-lg border border-foreground/15 px-3 py-1.5 text-xs font-medium transition hover:bg-foreground/5"
                     >
                       View Candidates →
                     </Link>
